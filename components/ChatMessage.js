@@ -1,4 +1,3 @@
-// components/ChatMessage.js
 import { useState } from "react";
 
 export default function ChatMessage({ message, onDelete, onToggleEdit, onSave, onUpdate }) {
@@ -50,7 +49,14 @@ export default function ChatMessage({ message, onDelete, onToggleEdit, onSave, o
                   Edit
                 </button>
               </>
-            ) : null}
+            ) :
+              <button
+                onClick={() => onUpdate(editContent)}
+                className="px-3 py-1 bg-green-500 text-white rounded"
+              >
+                Regenerate
+              </button>
+            }
             <button onClick={onDelete} className="px-3 py-1 bg-red-500 text-white rounded">
               Delete
             </button>

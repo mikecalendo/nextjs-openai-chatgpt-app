@@ -41,40 +41,86 @@ export default function ChatArea({ conversationId }) {
 
   // Send a new message and then get the AI response
   const handleSendMessage = async (content) => {
-    const userMessage = { id: Date.now(), role: "user", content, editing: false };
+    const userMessage = {
+      id: Date.now(),
+      role: "user",
+      content,
+      editing: false,
+    };
+
     const updatedMessages = [...messages, userMessage];
     setMessages(updatedMessages);
     await saveConversation(updatedMessages);
+
+    // Now fetch the AI response as a stream
     await fetchAIResponse(updatedMessages);
   };
 
   const fetchAIResponse = async (updatedMessages) => {
     try {
-      const res = await fetch("/api/chat", {
+      // Start fetch with the user’s latest messages
+      const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: updatedMessages }),
       });
-      const data = await res.json();
-      if (data.error) {
-        console.error("Error from API:", data.error);
+
+      // Create a new "assistant" message in state with empty content initially
+      const assistantMessageId = Date.now() + 1;
+      let newMessages = [
+        ...updatedMessages,
+        {
+          id: assistantMessageId,
+          role: "assistant",
+          content: "",
+          editing: false,
+        },
+      ];
+      setMessages(newMessages);
+
+      if (!response.body) {
+        console.error("No response body");
         return;
       }
-      const assistantMessage = {
-        id: Date.now() + 1,
-        role: "assistant",
-        content: data.content,
-        editing: false,
-      };
-      const newMessages = [...updatedMessages, assistantMessage];
-      setMessages(newMessages);
+
+      // Use a reader to read the streamed chunks
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let done = false;
+      let assistantContent = "";
+
+      while (!done) {
+        const { value, done: readerDone } = await reader.read();
+        done = readerDone;
+        if (value) {
+          // Decode the chunk into text
+          const chunk = decoder.decode(value);
+          assistantContent += chunk;
+
+          // Update the assistant message content in state
+          setMessages((prevMessages) => {
+            return prevMessages.map((msg) => {
+              if (msg.id === assistantMessageId) {
+                return { ...msg, content: assistantContent };
+              }
+              return msg;
+            });
+          });
+        }
+      }
+
+      // Once the stream is complete, we have the full assistant message
+      newMessages = newMessages.map((m) =>
+        m.id === assistantMessageId ? { ...m, content: assistantContent } : m
+      );
       await saveConversation(newMessages);
+
     } catch (error) {
       console.error("Error fetching AI response:", error);
     }
   };
 
-  // Update or delete messages (similar to previous implementations)
+  // Edit, update, or delete messages
   const handleDeleteMessage = async (id) => {
     const updatedMessages = messages.filter((msg) => msg.id !== id);
     setMessages(updatedMessages);
@@ -84,9 +130,11 @@ export default function ChatArea({ conversationId }) {
   const handleUpdateMessage = async (id, newContent) => {
     const index = messages.findIndex((msg) => msg.id === id);
     if (index === -1) return;
+
     const updatedMessages = messages.slice(0, index + 1).map((msg) =>
       msg.id === id ? { ...msg, content: newContent, editing: false } : msg
     );
+
     setMessages(updatedMessages);
     await saveConversation(updatedMessages);
     await fetchAIResponse(updatedMessages);

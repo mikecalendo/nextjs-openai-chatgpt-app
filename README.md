@@ -7,12 +7,13 @@ This is a full-stack chat application built with Next.js that lets you create an
 - [Features](#features)
 - [Tech Stack](#tech-stack)
 - [Environment Variables](#environment-variables)
-- [Setup and Installation](#setup-and-installation)
+- [Setup](#setup)
+- [Todo](#todo)
 
 ## Features
 
 - **Multi-Conversation Support:** Create, view, and manage multiple chat conversations.
-- **Real-Time Chat:** Send messages and receive AI-generated responses from ChatGPT o1-mini and other models.
+- **Real-Time Streaming AI Responses:** Messages from OpenAI stream token by token, creating a ChatGPT-like experience.
 - **Conversation Persistence:** All conversations (including their messages and titles) are stored in MongoDB.
 - **Inline Editing:** Edit conversation titles and individual messages with a clean, inline interface.
 - **Simple Code Editor:** Uses a basic textarea-based editor for message input.
@@ -23,7 +24,7 @@ This is a full-stack chat application built with Next.js that lets you create an
 - **Backend / API Routes:** Next.js API routes
 - **Database:** MongoDB
 - **AI Integration:** OpenAI o1-mini and other models
-- **Styling:** Tailwind CSS (or similar utility-first CSS classes)
+- **Styling:** Tailwind CSS
 
 ## Environment Variables
 
@@ -72,4 +73,5 @@ yarn dev
 Open http://localhost:3000 in your browser to view the app.
 
 ## Todo
-Add token streaming and voice-to-text
+Add response formatting.
+Real-Time Voice-to-Text: Add a feature to provide voice answers to questions, enabling a more interactive experience.

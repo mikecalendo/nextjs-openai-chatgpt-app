@@ -21,15 +21,34 @@ export default async function handler(req, res) {
   }));
 
   try {
+    // Make sure we use stream: true
     const response = await openai.chat.completions.create({
-      // // Can use other models if desired
       model: "o1-mini",
       messages: formattedMessages,
+      stream: true,
     });
-    const assistantMessage = response.choices[0].message.content;
-    return res.status(200).json({ content: assistantMessage });
+
+    // Set streaming-friendly headers
+    res.setHeader("Cache-Control", "no-cache, no-transform");
+    res.setHeader("Content-Type", "text/plain; charset=utf-8");
+    res.setHeader("Transfer-Encoding", "chunked");
+    res.setHeader("Connection", "keep-alive");
+
+    // Stream chunks as they arrive
+    for await (const part of response) {
+      const chunk = part.choices[0]?.delta?.content || "";
+      if (chunk) {
+        res.write(chunk);
+      }
+    }
+    res.end();
   } catch (error) {
     console.error("Error calling OpenAI API:", error);
-    return res.status(500).json({ error: "Error calling OpenAI API" });
+    // If an error occurs mid-stream, you may not be able to JSON-encode a response
+    // because you've already started sending chunks. You can do:
+    if (!res.headersSent) {
+      return res.status(500).json({ error: "Error calling OpenAI API" });
+    }
+    res.end();
   }
 }
