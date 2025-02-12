@@ -70,8 +70,9 @@ npm run dev
 yarn dev
 ```
 
-Open http://localhost:3000 in your browser to view the app.
+5. **Open in Browser:**
+Open http://localhost:3000 to view the app.
 
 ## Todo
-Add response formatting.
-Real-Time Voice-to-Text: Add a feature to provide voice answers to questions, enabling a more interactive experience.
+- **Add Response Formatting:** Improve how responses are displayed for better readability.
+- **Add Voice-To-Text:** Enable real-time voice input to answer questions interactively.
