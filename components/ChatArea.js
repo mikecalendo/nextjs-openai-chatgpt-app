@@ -140,14 +140,24 @@ export default function ChatArea({ conversationId }) {
     await fetchAIResponse(updatedMessages);
   };
 
-  const handleEditMessage = async (id, newContent) => {
-    const updatedMessages = messages.map((msg) =>
-      msg.id === id ? { ...msg, content: newContent, editing: false } : msg
-    );
-    setMessages(updatedMessages);
-    await saveConversation(updatedMessages);
+  const handleRegenerateAssistantMessage = async (assistantMessageId) => {
+    // Find the index of the assistant message that triggered regeneration.
+    const index = messages.findIndex((msg) => msg.id === assistantMessageId);
+    if (index === -1) return;
+  
+    // Truncate the conversation up to the assistant message.
+    // This removes the selected assistant message and any messages following it.
+    const truncatedConversation = messages.slice(0, index);
+  
+    // Update state and persist the truncated conversation.
+    setMessages(truncatedConversation);
+    await saveConversation(truncatedConversation);
+  
+    // Regenerate the assistant response based on the truncated conversation.
+    // Typically, the conversation now ends with the user message that triggered the assistant reply.
+    await fetchAIResponse(truncatedConversation);
   };
-
+  
   const toggleEditing = (id) => {
     const updatedMessages = messages.map((msg) =>
       msg.id === id ? { ...msg, editing: !msg.editing } : msg
@@ -164,8 +174,8 @@ export default function ChatArea({ conversationId }) {
             message={message}
             onDelete={() => handleDeleteMessage(message.id)}
             onToggleEdit={() => toggleEditing(message.id)}
-            onSave={(newContent) => handleEditMessage(message.id, newContent)}
             onUpdate={(newContent) => handleUpdateMessage(message.id, newContent)}
+            onRegenerate={() => handleRegenerateAssistantMessage(message.id)}
           />
         ))}
       </div>

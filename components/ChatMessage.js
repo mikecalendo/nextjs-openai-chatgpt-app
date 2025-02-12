@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export default function ChatMessage({ message, onDelete, onToggleEdit, onSave, onUpdate }) {
+export default function ChatMessage({ message, onDelete, onToggleEdit, onUpdate, onRegenerate }) {
   const [editContent, setEditContent] = useState(message.content);
   const bgColor = message.role === "assistant" ? "bg-gray-100" : "bg-blue-100";
 
@@ -19,12 +19,6 @@ export default function ChatMessage({ message, onDelete, onToggleEdit, onSave, o
           />
           <div className="mt-2 flex gap-2">
             <button
-              onClick={() => onSave(editContent)}
-              className="px-3 py-1 bg-blue-500 text-white rounded"
-            >
-              Save
-            </button>
-            <button
               onClick={() => onUpdate(editContent)}
               className="px-3 py-1 bg-green-500 text-white rounded"
             >
@@ -42,7 +36,7 @@ export default function ChatMessage({ message, onDelete, onToggleEdit, onSave, o
         <div>
           <div className="whitespace-pre-wrap">{message.content}</div>
           <div className="mt-2 flex gap-2">
-            {/* Enable updating old user messages */}
+            {/* Enable editing old user messages */}
             {message.role !== "assistant" ? (
               <>
                 <button onClick={onToggleEdit} className="px-3 py-1 bg-blue-500 text-white rounded">
@@ -50,12 +44,15 @@ export default function ChatMessage({ message, onDelete, onToggleEdit, onSave, o
                 </button>
               </>
             ) :
-              <button
-                onClick={() => onUpdate(editContent)}
-                className="px-3 py-1 bg-green-500 text-white rounded"
-              >
-                Regenerate
-              </button>
+              <>
+                {/* Regenerate old AI assistance messages */}
+                <button
+                  onClick={() => onRegenerate(message.id)}
+                  className="px-3 py-1 bg-green-500 text-white rounded"
+                >
+                  Regenerate
+                </button>
+              </>
             }
             <button onClick={onDelete} className="px-3 py-1 bg-red-500 text-white rounded">
               Delete
