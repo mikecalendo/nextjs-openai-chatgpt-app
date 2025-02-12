@@ -154,7 +154,7 @@ export default function ChatArea({ conversationId }) {
     await saveConversation(truncatedConversation);
   
     // Regenerate the assistant response based on the truncated conversation.
-    // Typically, the conversation now ends with the user message that triggered the assistant reply.
+    // Once generated, the new AI assistant message will be appended as the last message in the conversation.
     await fetchAIResponse(truncatedConversation);
   };
   
