@@ -23,7 +23,8 @@ export default async function handler(req, res) {
   try {
     // Make sure we use stream: true
     const response = await openai.chat.completions.create({
-      model: "o1-mini",
+      // model: "o1-mini",
+      model: "gpt-4.5-preview",
       messages: formattedMessages,
       stream: true,
     });
